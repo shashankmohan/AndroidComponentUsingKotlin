@@ -2,6 +2,7 @@ package com.smaple.demo.demoapp
 
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -14,6 +15,8 @@ import android.widget.Toast
 class FragmentTest : Fragment() {
 
     lateinit var mActivity: MainActivity;
+    lateinit var mReceiver: MyReceiver;
+    lateinit var intentFilter: IntentFilter;
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -49,6 +52,16 @@ class FragmentTest : Fragment() {
                 mActivity.stopService(intentStop)
             }
         }
+
+        var btnDynamicBroadCast: Button = view.findViewById(R.id.btn_dynamic_broadcast)
+        btnDynamicBroadCast.setOnClickListener {
+            var intent = Intent("com.custom_broadcast")
+            mActivity.sendBroadcast(intent)
+        }
+
+        mReceiver = MyReceiver();
+        intentFilter = IntentFilter("com.custom_broadcast")
+
         return view;
     }
 
@@ -69,6 +82,7 @@ class FragmentTest : Fragment() {
     override fun onResume() {
         super.onResume()
         Log.e("FragmentTest onResume", "onResume");
+        mActivity.registerReceiver(mReceiver, intentFilter)
     }
 
 
@@ -85,6 +99,10 @@ class FragmentTest : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         Log.e("FragmentTest onDestroy", "onDestroy");
+        mActivity.unregisterReceiver(mReceiver)
+
+        // java.lang.IllegalArgumentException: Receiver not registered: com.smaple.demo.demoapp.MyReceiver@27b30bf5
+        //  mActivity.unregisterReceiver(mReceiver)
     }
 
 
